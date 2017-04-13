@@ -54,4 +54,5 @@ After, run `wpinit` command and use these features!
 ## Credits
 
 Created by [**@stenioanibal**](https://github.com/stenioanibal)
+
 Thanks for [**@gerbton**](https://github.com/Gerbton) for the contribution
