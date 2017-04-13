@@ -12,6 +12,7 @@ This command build a basic structure to init or clone one Wordpress Project to y
 - Option to change default host created
 - Option to edit default wp-config.php file or create new with **Database Information**
 - Option to change default table prefix in wp-config
+- Custom Vagrant Folder
 
 ### Clone this
 
