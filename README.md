@@ -20,7 +20,7 @@ To clone this project, follow this steps sequence:
 1 - Run this command:
 
 ```
-curl https://raw.githubusercontent.com/stenioanibal/Tracking-infos-for-Frenet/master/ajax-tracking.js > ~/.iovagrantf --silent
+curl https://raw.githubusercontent.com/stenioanibal/iovagrantcreator/master/iovagrantf > ~/.iovagrantf --silent
 ```
 
 2 - Paste this code into your `.zshrc` into `~` folder
