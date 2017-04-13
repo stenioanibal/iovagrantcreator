@@ -23,7 +23,12 @@ To clone this project, follow this steps sequence:
 curl https://raw.githubusercontent.com/stenioanibal/iovagrantcreator/master/iovagrantf > ~/.iovagrantf --silent
 ```
 
-2 - Paste this code into your `.zshrc` into `~` folder
+2 - Paste this code into your `.zshrc`, present in `~` folder
+
+```
+cd ~
+sudo vim .zshrc
+```
 
 ```
 # IOVagrant Creator
