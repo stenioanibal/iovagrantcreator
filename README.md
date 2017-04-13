@@ -31,7 +31,7 @@ IOVDIRECTORY=~/.iovagrantf
 source $IOVDIRECTORY
 ```
 
-After, run wpinit command and use these features! 
+After, run `wpinit` command and use these features! 
 
 ### Options
 
