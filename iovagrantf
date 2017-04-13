@@ -1,0 +1,219 @@
+function wpinitHelp(){
+	echo "To use this, enter the command wpinit"
+	echo "More informations is asked in process...\n\n" 
+	
+	echo "Available Parameters:\n"
+	echo "  -cvd = Change your Vagrant Directory"
+	echo "  -h   = Help\n\n"
+}
+
+function makeVagrantDirectory(){
+	touch ~/.iovagrantd
+
+	vDirectory=""
+	vared -p 'Set your Vagrant Directory (NO WWW!): ' -c vDirectory
+	
+	echo -e "$vDirectory" > ~/.iovagrantd
+}
+
+function changeVagrantDirectory(){
+	echo "Change your Vagrant Directory!\n\n"
+
+	vDirectory=""
+	vared -p 'Set your NEW Vagrant Directory (NO WWW!): ' -c vDirectory
+
+	echo -e "$vDirectory" > ~/.iovagrantd
+	echo "Vagrant directory has been changed!\n\n"
+	return 1
+}
+
+function wpinit(){
+	# Printing hello message
+        echo -e "\n\nIOVagrant Creator v1.0.0\n\n"
+        sleep 1
+
+	if [ -n "$1"  ]
+  	then
+ 	   	if [ "$1" = "-cvd" ]
+		then
+			changeVagrantDirectory
+			return 1
+		elif [ "$1" = "-h" ]
+		then 
+			wpinitHelp
+			return 1
+		else
+			echo "Invalid Parameters!\n\n"
+			echo "Try wpinit -h to get help"
+			return 1
+		fi
+	fi
+	
+	# Checking if Vagrant Directory is set
+	if [ ! -f ~/.iovagrantd ]; then
+		makeVagrantDirectory
+	fi
+
+	# Getting Vagrant Directory from File
+	vagrantDirectory=$(<~/.iovagrantd)
+
+	# Getting project name
+	projectName=""
+	vared -p 'Project name: ' -c projectName
+
+    	# Getting Parameter 2
+	removeContent=""
+    	vared -p 'Remove wp-content? (y | n) ' -c removeContent
+
+    	while [ "$removeContent" != "y" ] && [ "$removeContent" != "n" ];
+    	do
+        	echo "\nInvalid option...\n"
+		removeContent=""
+        	vared -p 'Remove wp-content? (y | n) ' -c removeContent
+    	done
+
+    	# Getting Parameter 3
+	runProvision=""
+    	vared -p 'Run provision after complete? (y | n) ' -c runProvision
+
+    	while [ "$runProvision" != "y" ] && [ "$runProvision" != "n" ];
+    	do
+        	echo "\nInvalid option...\n"
+		runProvision=""
+        	vared -p 'Run provision after complete? (y | n) ' -c runProvision
+    	done
+
+	# Getting Parameter 4
+	configOption=""
+    	vared -p 'Edit default or create custom wp-config file? (e | c) ' -c configOption
+
+    	while [ "$configOption" != "e" ] && [ "$configOption" != "c" ];
+    	do
+        	echo "\nInvalid option...\n"
+        	configOption=""
+        	vared -p 'Edit default or create custom wp-config file? (e | c) ' -c configOption
+    	done
+
+	# Getting complementary parameters to parameter 4 (if this is create) 
+	if [ "$configOption" = "c" ]
+	then
+		dbName=""
+		dbUser=""
+		dbPass=""
+		tablePrefix=""
+
+		vared -p 'Database Name: ' -c dbName
+		vared -p 'Database User: ' -c dbUser
+		
+		echo -n 'Database Password: '
+		read -s dbPass
+		echo ''
+	
+		vared -p 'Table prefix: (wp_) ' -c tablePrefix
+
+		if [ "$tablePrefix" = "" ]
+    		then
+            		tablePrefix="wp_"
+    		fi
+	fi	
+	
+	# Entering in vagrant directory
+    	cd $vagrantDirectory
+
+    	# Making wordpress default folder from project
+    	cp -r www/wordpress-default www/$projectName
+
+	# Removing WP-CONTENT
+    	if [ "$removeContent" != "n" ]
+    	then
+        	rm -rf www/$projectName/public_html/wp-content/
+		mkdir www/$projectName/public_html/wp-content/
+    	fi
+
+	if [ "$configOption" = "c" ]
+	then
+		# Making wp-config file
+		rm www/$projectName/public_html/wp-config.php
+    		touch www/$projectName/public_html/wp-config.php
+
+        	wpConfig="www/$projectName/public_html/wp-config.php"
+		
+		echo -e "<?php" >> $wpConfig
+        	echo -e "// Created by IOVagrant Creator" >> $wpConfig
+        	echo -e "\ndefine( 'DB_NAME', '$dbName' );" >> $wpConfig
+        	echo -e "define( 'DB_USER', '$dbUser' );" >> $wpConfig
+        	echo -e "define( 'DB_PASSWORD', '$dbPass' );" >> $wpConfig
+	        echo -e "define( 'DB_HOST', 'localhost' );" >> $wpConfig
+        	echo -e "define( 'DB_CHARSET', 'utf8' );" >> $wpConfig
+	        echo -e "define( 'DB_COLLATE', '' );" >> $wpConfig
+        	echo -e "\$table_prefix = '$tablePrefix';" >> $wpConfig
+
+        	# Printing default conf options
+        	echo -e "\n\ndefine( 'WP_DEBUG', true );" >> $wpConfig
+        	echo -e "define( 'WP_DEBUG_DISPLAY', false );" >> $wpConfig
+	        echo -e "define( 'WP_DEBUG_LOG', true );" >> $wpConfig
+        	echo -e "define( 'WP_AUTO_UPDATE_CORE', false );" >> $wpConfig
+	        echo -e "define ( 'AUTOMATIC_UPDATER_DISABLED' , true);" >> $wpConfig
+        	echo -e "define('WPCF7_AUTOP', false);" >> $wpConfig
+	        echo -e "define( 'WPCF7_ADMIN_READ_CAPABILITY', 'manage_options');" >> $wpConfig
+        	echo -e "define( 'WPCF7_ADMIN_READ_WRITE_CAPABILITY', 'manage_options');" >> $wpConfig
+
+        	# Default security access options
+
+        	echo -e "\n\nif ( ! defined( 'ABSPATH' ) )" >> $wpConfig
+        	echo -e "\tdefine( 'ABSPATH', dirname( __FILE__ ) . '/' );" >> $wpConfig
+        	echo -e "\nrequire_once ABSPATH . 'wp-settings.php';" >> $wpConfig
+	else
+		# Opening default wp-config file
+		vim www/$projectName/public_html/wp-config.php
+	fi
+
+	# Question to host
+	#vared -p 'Host Name: ($projectName.dev) ' -c host
+
+	if [ "$host" = "" ]
+	then
+		host="$projectName.dev"
+	fi
+
+	if [ "$(uname -s)" = "Darwin" ]
+	then
+		sed -i '' '/# The following commented out site configuration will create a standard WordPress/i\
+        	\
+        	\'"   $projectName"':\
+        	\     hosts:\
+        	\         -'" $host"'\
+		\ ' vvv-config.yml
+	elif [ "$(uname -s)" = "Linux"  ]
+	then
+		sed -i '/# The following commented out site configuration will create a standard WordPress/i\
+\
+\'"  $projectName"':\
+\    hosts:\
+\      -'" $host"'\
+\ ' vvv-config.yml
+	fi
+
+	# Making .conf file into nginx-config
+    	touch config/nginx-config/sites/$projectName.conf
+
+	nginxConf="config/nginx-config/sites/$projectName.conf"
+
+    	echo -e "# Created by IOVagrant Creator" >> $nginxConf
+	echo -e "\nserver {" >> $nginxConf
+    	echo -e "\tlisten       80;" >> $nginxConf
+    	echo -e "\tlisten       443 ssl;" >> $nginxConf
+    	echo -e "\tserver_name  $host ~^$projectName\.\d+\.\d+\.\d+\.\d+\.xip\.io$;" >> $nginxConf
+    	echo -e "\troot         /srv/www/$projectName/public_html;" >> $nginxConf
+    	echo -e "\tinclude /etc/nginx/nginx-wp-common.conf;" >> $nginxConf
+   	echo -e "}" >> $nginxConf
+
+	# Provisioning VAGRANT
+    	if [ $runProvision != "n" ]
+    	then
+        	vagrant up
+        	vagrant provision
+    	fi
+
+ 	echo "\n\nFinished!\n\n"
+}
