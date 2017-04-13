@@ -50,3 +50,8 @@ After, run `wpinit` command and use these features!
 
 - Enter the path of the vagrant from the root. Ex: `/Users/JohnDoe/Vagrant/wordpress/`
 - Never ever enter `www` folder to Vagrant Directory!
+
+## Credits
+
+Created by **@stenioanibal**
+Thanks for **@gerbton** for the contribution
