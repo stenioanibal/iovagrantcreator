@@ -1,6 +1,6 @@
 # IOVagrant Creator
 
-Create a complete project structure using Vagrant, VVV and Zsh
+Create a complete project structure using Vagrant, VVV and Zsh running `wpinit` command!
 
 This command build a basic structure to init or clone one Wordpress Project to your Vagrant machine using VVV, including:
 
