@@ -29,8 +29,8 @@ function changeVagrantDirectory(){
 
 function wpinit(){
 	# Printing hello message
-        echo -e "\n\nIOVagrant Creator v1.0.0\n\n"
-        sleep 1
+    echo -e "\n\nIOVagrant Creator v2.0.0\n\n"
+    sleep 1
 
 	if [ -n "$1"  ]
   	then
@@ -61,38 +61,38 @@ function wpinit(){
 	projectName=""
 	vared -p 'Project name: ' -c projectName
 
-    	# Getting Parameter 2
+	# Getting Parameter 2
 	removeContent=""
-    	vared -p 'Remove wp-content? (y | n) ' -c removeContent
+	vared -p 'Remove wp-content? (y | n) ' -c removeContent
 
-    	while [ "$removeContent" != "y" ] && [ "$removeContent" != "n" ];
-    	do
-        	echo "\nInvalid option...\n"
+	while [ "$removeContent" != "y" ] && [ "$removeContent" != "n" ];
+	do
+    	echo "\nInvalid option...\n"
 		removeContent=""
-        	vared -p 'Remove wp-content? (y | n) ' -c removeContent
-    	done
+		vared -p 'Remove wp-content? (y | n) ' -c removeContent
+	done
 
-    	# Getting Parameter 3
+	# Getting Parameter 3
 	runProvision=""
-    	vared -p 'Run provision after complete? (y | n) ' -c runProvision
+	vared -p 'Run provision after complete? (y | n) ' -c runProvision
 
-    	while [ "$runProvision" != "y" ] && [ "$runProvision" != "n" ];
-    	do
-        	echo "\nInvalid option...\n"
+	while [ "$runProvision" != "y" ] && [ "$runProvision" != "n" ];
+	do
+    	echo "\nInvalid option...\n"
 		runProvision=""
-        	vared -p 'Run provision after complete? (y | n) ' -c runProvision
-    	done
+    	vared -p 'Run provision after complete? (y | n) ' -c runProvision
+	done
 
 	# Getting Parameter 4
 	configOption=""
-    	vared -p 'Edit default or create custom wp-config file? (e | c) ' -c configOption
+	vared -p 'Edit default or create custom wp-config file? (e | c) ' -c configOption
 
-    	while [ "$configOption" != "e" ] && [ "$configOption" != "c" ];
-    	do
-        	echo "\nInvalid option...\n"
-        	configOption=""
-        	vared -p 'Edit default or create custom wp-config file? (e | c) ' -c configOption
-    	done
+	while [ "$configOption" != "e" ] && [ "$configOption" != "c" ];
+	do
+    	echo "\nInvalid option...\n"
+    	configOption=""
+    	vared -p 'Edit default or create custom wp-config file? (e | c) ' -c configOption
+	done
 
 	# Getting complementary parameters to parameter 4 (if this is create) 
 	if [ "$configOption" = "c" ]
@@ -112,57 +112,67 @@ function wpinit(){
 		vared -p 'Table prefix: (wp_) ' -c tablePrefix
 
 		if [ "$tablePrefix" = "" ]
-    		then
-            		tablePrefix="wp_"
-    		fi
+		then
+    		tablePrefix="wp_"
+		fi
 	fi	
-	
-	# Entering in vagrant directory
-    	cd $vagrantDirectory
 
-    	# Making wordpress default folder from project
-    	cp -r www/wordpress-default www/$projectName
+	# Getting Parameter 5
+	makeDb=""
+	vared -p 'Do you want a automatically database creation? (y | n) ' -c makeDb
+
+	while [ "$makeDb" != "y" ] && [ "$makeDb" != "n" ];
+	do
+    	echo "\nInvalid option...\n"
+    	makeDb=""
+    	vared -p 'You want a automatically database creation? (y | n) ' -c makeDb
+	done
+
+	# Entering in vagrant directory
+	cd $vagrantDirectory
+
+	# Making wordpress default folder from project
+	cp -r www/wordpress-default www/$projectName
 
 	# Removing WP-CONTENT
-    	if [ "$removeContent" != "n" ]
-    	then
-        	rm -rf www/$projectName/public_html/wp-content/
+	if [ "$removeContent" != "n" ]
+	then
+    	rm -rf www/$projectName/public_html/wp-content/
 		mkdir www/$projectName/public_html/wp-content/
-    	fi
+	fi
 
 	if [ "$configOption" = "c" ]
 	then
 		# Making wp-config file
 		rm www/$projectName/public_html/wp-config.php
-    		touch www/$projectName/public_html/wp-config.php
+		touch www/$projectName/public_html/wp-config.php
 
-        	wpConfig="www/$projectName/public_html/wp-config.php"
+    	wpConfig="www/$projectName/public_html/wp-config.php"
 		
 		echo -e "<?php" >> $wpConfig
-        	echo -e "// Created by IOVagrant Creator" >> $wpConfig
-        	echo -e "\ndefine( 'DB_NAME', '$dbName' );" >> $wpConfig
-        	echo -e "define( 'DB_USER', '$dbUser' );" >> $wpConfig
-        	echo -e "define( 'DB_PASSWORD', '$dbPass' );" >> $wpConfig
-	        echo -e "define( 'DB_HOST', 'localhost' );" >> $wpConfig
-        	echo -e "define( 'DB_CHARSET', 'utf8' );" >> $wpConfig
-	        echo -e "define( 'DB_COLLATE', '' );" >> $wpConfig
-        	echo -e "\$table_prefix = '$tablePrefix';" >> $wpConfig
+    	echo -e "// Created by IOVagrant Creator" >> $wpConfig
+    	echo -e "\ndefine( 'DB_NAME', '$dbName' );" >> $wpConfig
+    	echo -e "define( 'DB_USER', '$dbUser' );" >> $wpConfig
+    	echo -e "define( 'DB_PASSWORD', '$dbPass' );" >> $wpConfig
+        echo -e "define( 'DB_HOST', 'localhost' );" >> $wpConfig
+    	echo -e "define( 'DB_CHARSET', 'utf8' );" >> $wpConfig
+        echo -e "define( 'DB_COLLATE', '' );" >> $wpConfig
+    	echo -e "\$table_prefix = '$tablePrefix';" >> $wpConfig
 
-        	# Printing default conf options
-        	echo -e "\n\ndefine( 'WP_DEBUG', true );" >> $wpConfig
-        	echo -e "define( 'WP_DEBUG_DISPLAY', false );" >> $wpConfig
-	        echo -e "define( 'WP_DEBUG_LOG', true );" >> $wpConfig
-        	echo -e "define( 'WP_AUTO_UPDATE_CORE', false );" >> $wpConfig
-	        echo -e "define ( 'AUTOMATIC_UPDATER_DISABLED' , true);" >> $wpConfig
-        	echo -e "define('WPCF7_AUTOP', false);" >> $wpConfig
-	        echo -e "define( 'WPCF7_ADMIN_READ_CAPABILITY', 'manage_options');" >> $wpConfig
-        	echo -e "define( 'WPCF7_ADMIN_READ_WRITE_CAPABILITY', 'manage_options');" >> $wpConfig
+    	# Printing default conf options
+    	echo -e "\n\ndefine( 'WP_DEBUG', true );" >> $wpConfig
+    	echo -e "define( 'WP_DEBUG_DISPLAY', false );" >> $wpConfig
+        echo -e "define( 'WP_DEBUG_LOG', true );" >> $wpConfig
+    	echo -e "define( 'WP_AUTO_UPDATE_CORE', false );" >> $wpConfig
+        echo -e "define ( 'AUTOMATIC_UPDATER_DISABLED' , true);" >> $wpConfig
+    	echo -e "define('WPCF7_AUTOP', false);" >> $wpConfig
+        echo -e "define( 'WPCF7_ADMIN_READ_CAPABILITY', 'manage_options');" >> $wpConfig
+    	echo -e "define( 'WPCF7_ADMIN_READ_WRITE_CAPABILITY', 'manage_options');" >> $wpConfig
 
-        	# Default security access options
-
-        	echo -e "\n\nif ( ! defined( 'ABSPATH' ) )" >> $wpConfig
-        	echo -e "\tdefine( 'ABSPATH', dirname( __FILE__ ) . '/' );" >> $wpConfig
-        	echo -e "\nrequire_once ABSPATH . 'wp-settings.php';" >> $wpConfig
+    	# Default security access options
+    	echo -e "\n\nif ( ! defined( 'ABSPATH' ) )" >> $wpConfig
+    	echo -e "\tdefine( 'ABSPATH', dirname( __FILE__ ) . '/' );" >> $wpConfig
+    	echo -e "\nrequire_once ABSPATH . 'wp-settings.php';" >> $wpConfig
 	else
 		# Opening default wp-config file
 		vim www/$projectName/public_html/wp-config.php
@@ -177,43 +187,55 @@ function wpinit(){
 	fi
 
 	if [ "$(uname -s)" = "Darwin" ]
-	then
-		sed -i '' '/# The following commented out site configuration will create a standard WordPress/i\
-        	\
-        	\'"   $projectName"':\
-        	\     hosts:\
-        	\         -'" $host"'\
-		\ ' vvv-config.yml
-	elif [ "$(uname -s)" = "Linux"  ]
-	then
-		sed -i '/# The following commented out site configuration will create a standard WordPress/i\
+    then
+        sed -i '' '/# The following commented out site configuration will create a standard WordPress/i\
+            \
+            \'"   $projectName"':\
+            \     hosts:\
+            \         -'" $host"'\
+        \ ' vvv-config.yml
+    elif [ "$(uname -s)" = "Linux"  ]
+    then
+        sed -i '/# The following commented out site configuration will create a standard WordPress/i\
 \
 \'"  $projectName"':\
 \    hosts:\
 \      -'" $host"'\
 \ ' vvv-config.yml
-	fi
+    fi
 
 	# Making .conf file into nginx-config
-    	touch config/nginx-config/sites/$projectName.conf
+	touch config/nginx-config/sites/$projectName.conf
 
 	nginxConf="config/nginx-config/sites/$projectName.conf"
 
-    	echo -e "# Created by IOVagrant Creator" >> $nginxConf
+	echo -e "# Created by IOVagrant Creator" >> $nginxConf
 	echo -e "\nserver {" >> $nginxConf
-    	echo -e "\tlisten       80;" >> $nginxConf
-    	echo -e "\tlisten       443 ssl;" >> $nginxConf
-    	echo -e "\tserver_name  $host ~^$projectName\.\d+\.\d+\.\d+\.\d+\.xip\.io$;" >> $nginxConf
-    	echo -e "\troot         /srv/www/$projectName/public_html;" >> $nginxConf
-    	echo -e "\tinclude /etc/nginx/nginx-wp-common.conf;" >> $nginxConf
+	echo -e "\tlisten       80;" >> $nginxConf
+	echo -e "\tlisten       443 ssl;" >> $nginxConf
+	echo -e "\tserver_name  $host ~^$projectName\.\d+\.\d+\.\d+\.\d+\.xip\.io$;" >> $nginxConf
+	echo -e "\troot         /srv/www/$projectName/public_html;" >> $nginxConf
+	echo -e "\tinclude /etc/nginx/nginx-wp-common.conf;" >> $nginxConf
    	echo -e "}" >> $nginxConf
 
+   	# Create DB
+	if [ $makeDb != "n" ]
+	then
+		echo "\nUpping Vagrant...\n"
+		vagrant up
+
+    	echo "\nCreating Database...\n"
+
+    	query="create database $dbName;"
+    	vagrant ssh -- -t "mysql -e ' $query '"
+	fi
+
 	# Provisioning VAGRANT
-    	if [ $runProvision != "n" ]
-    	then
-        	vagrant up
-        	vagrant provision
-    	fi
+	if [ $runProvision != "n" ]
+	then
+    	vagrant up
+    	vagrant provision
+	fi
 
  	echo "\n\nFinished!\n\n"
 }
