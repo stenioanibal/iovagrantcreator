@@ -6,6 +6,7 @@ This command build a basic structure to init or clone one Wordpress Project to y
 
 - **Automatically** create nginx .conf files
 - **Automatically** define hosts in vvv-config.yml file
+- **Automatically** database create
 - Clone wordpress-default folder
 - Option to delete and create blank wp-content folder
 - Option to run Vagrant Provision on complete steps
