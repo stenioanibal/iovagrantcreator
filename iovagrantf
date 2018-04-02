@@ -29,7 +29,7 @@ function changeVagrantDirectory(){
 
 function wpinit(){
 	# Printing hello message
-    echo -e "\n\nIOVagrant Creator v2.0.0\n\n"
+    echo -e "\n\nIOVagrant Creator v2.2.0\n\n"
     sleep 1
 
 	if [ -n "$1"  ]
@@ -70,17 +70,6 @@ function wpinit(){
     	echo "\nInvalid option...\n"
 		removeContent=""
 		vared -p 'Remove wp-content? (y | n) ' -c removeContent
-	done
-
-	# Getting Parameter 3
-	runProvision=""
-	vared -p 'Run provision after complete? (y | n) ' -c runProvision
-
-	while [ "$runProvision" != "y" ] && [ "$runProvision" != "n" ];
-	do
-    	echo "\nInvalid option...\n"
-		runProvision=""
-    	vared -p 'Run provision after complete? (y | n) ' -c runProvision
 	done
 
 	# Getting Parameter 4
@@ -179,21 +168,21 @@ function wpinit(){
 	fi
 
 	# Question to host
-	#vared -p 'Host Name: ($projectName.dev) ' -c host
+	#vared -p 'Host Name: ($projectName.idx) ' -c host
 
 	if [ "$host" = "" ]
 	then
-		host="$projectName.dev"
+		host="$projectName.idx"
 	fi
 
 	if [ "$(uname -s)" = "Darwin" ]
     then
         sed -i '' '/# The following commented out site configuration will create a standard WordPress/i\
             \
-            \'"   $projectName"':\
-            \     hosts:\
-            \         -'" $host"'\
-        \ ' vvv-config.yml
+            \'"  $projectName"':\
+            \    hosts:\
+            \      -'" $host"'\
+        \ ' vvv-custom.yml
     elif [ "$(uname -s)" = "Linux"  ]
     then
         sed -i '/# The following commented out site configuration will create a standard WordPress/i\
@@ -201,7 +190,7 @@ function wpinit(){
 \'"  $projectName"':\
 \    hosts:\
 \      -'" $host"'\
-\ ' vvv-config.yml
+\ ' vvv-custom.yml
     fi
 
 	# Making .conf file into nginx-config
@@ -217,12 +206,17 @@ function wpinit(){
 	echo -e "\troot         /srv/www/$projectName/public_html;" >> $nginxConf
 	echo -e "\tinclude /etc/nginx/nginx-wp-common.conf;" >> $nginxConf
    	echo -e "}" >> $nginxConf
+	
+	command="# Created by IOVagrant Creator \nserver { \n\tlisten       80; \n\tlisten       443 ssl; \n\tserver_name  $host ~^$projectName\.\d+\.\d+\.\d+\.\d+\.xip\.io$; \n\troot         /srv/www/$projectName/public_html; \n\tinclude /etc/nginx/nginx-wp-common.conf; \n}"
+       
+	echo "\nCreating Configurantions into Vagrant-box...\n"
+ 
+	vagrant up 
+	vagrant ssh -- -t "sudo echo -e '$command' >> '$projectName.conf' && sudo mv '$projectName.conf' /etc/nginx/custom-sites/"
 
    	# Create DB
 	if [ $makeDb != "n" ]
 	then
-		echo "\nUpping Vagrant...\n"
-		vagrant up
 
     	echo "\nCreating Database...\n"
 
@@ -230,12 +224,6 @@ function wpinit(){
     	vagrant ssh -- -t "mysql -e ' $query '"
 	fi
 
-	# Provisioning VAGRANT
-	if [ $runProvision != "n" ]
-	then
-    	vagrant up
-    	vagrant provision
-	fi
-
+	vagrant reload
  	echo "\n\nFinished!\n\n"
 }
